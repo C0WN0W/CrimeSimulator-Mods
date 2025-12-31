@@ -13,7 +13,6 @@ public class StackPatch : BaseUnityPlugin
     }
 }
 
-// Still using this shit Class
 [HarmonyPatch(typeof(ItemSlot), "RefreshAmount")]
 class ItemSlotRefreshPatch
 {
@@ -52,4 +51,5 @@ class PlayerInventoryUpdatePatch
         }
     }
 }
+
 
