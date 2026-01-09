@@ -9,7 +9,7 @@ namespace CN_Alchemy
     {
         private void Awake()
         {
-            var harmony = new Harmony("areon.furnace.alwaysgold");
+            var harmony = new Harmony("com.cownow.furnace");
             harmony.PatchAll();
             Logger.LogInfo("Alchemy Mod Loaded.");
         }
@@ -39,3 +39,4 @@ namespace CN_Alchemy
 
 
 }
+
