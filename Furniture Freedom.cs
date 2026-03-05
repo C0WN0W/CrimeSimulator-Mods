@@ -2,6 +2,7 @@ using BepInEx;
 using HarmonyLib;
 using I2.Loc;
 using UnityEngine;
+using UnityEngine.UI;
 
 [BepInPlugin("com.cownow.furniturefreedom", "Furniture Freedom", "1.0.0")]
 public class FurnitureFreedomPlugin : BaseUnityPlugin
@@ -93,22 +94,30 @@ class Patch_OrderFurniture
     }
 }
 
+// Modify balance display to always show ₡0
 [HarmonyPatch(typeof(FurnitureWebsite), "SelectFurniture")]
 class Patch_SelectFurniture
 {
     static void Postfix(FurnitureWebsite __instance)
     {
-        // Modify balance display to always show ₡0
         __instance.priceTxt.text = "0₡";
     }
 }
+[HarmonyPatch(typeof(FurnitureButton), "AssignFurniture")]
+class Patch_AssignFurniture
+{
+    static void Postfix(FurnitureButton __instance)
+    {
+        __instance.priceTxt.text = "₡0";
+    }
+}
 
+// Can always buy furniture, so set actualPrice to 0 and update UI accordingly
 [HarmonyPatch(typeof(FurnitureWebsite), "CheckIfCanBuy")]
 class Patch_CheckIfCanBuy
 {
     static void Postfix(FurnitureWebsite __instance)
     {
-        // Can always buy furniture, so set actualPrice to 0 and update UI accordingly
         var field = AccessTools.Field(typeof(FurnitureWebsite), "actualPrice");
         field.SetValue(__instance, 0);
 
@@ -117,5 +126,24 @@ class Patch_CheckIfCanBuy
         __instance.orderButton.interactable = true;
         __instance.orderTxt.text = LocalizationManager.GetTranslation("order", true, 0, true, false, null, null, true) + " (0₡)"; ;
         __instance.orderTxt.color = Color.white;
+    }
+}
+
+// Unlock all furniture in the furniture menu
+[HarmonyPatch(typeof(FurnitureButton), "CheckIfUnlocked")]
+class Patch_CheckIfUnlocked
+{
+    static bool Prefix(FurnitureButton __instance)
+    {
+        var button = Traverse.Create(__instance).Field("button").GetValue<Button>();
+
+        if (button == null)
+            button = __instance.gameObject.GetComponent<Button>();
+
+        button.interactable = true;
+        __instance.lockedObj.SetActive(false);
+        __instance.unlockedObj.SetActive(true);
+
+        return false;
     }
 }
